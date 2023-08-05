@@ -17,6 +17,8 @@ import Halogen.VDom.Driver (runUI)
 import Network.RemoteData (RemoteData(..))
 import Page.About as About
 import Page.Admin as Admin
+import Page.NotIsolated as NotIsolated
+import Page.NotIsolated (Query(..))
 import Page.WithTypeClass as WithTypeClass
 import Type.Prelude (Proxy(..))
 
@@ -32,11 +34,14 @@ data Action
   | LoadAbout
   | LoadAdmin
   | LoadWithTypeClass
+  | LoadNotIsolated
+  | SendQuery
 
 data Route m
   = About (RemoteData Unit (H.Component NoQuery {} Void m))
   | Admin (RemoteData Unit (H.Component NoQuery {} Void m))
   | WithTypeClass (RemoteData Unit (H.Component NoQuery {} Void m))
+  | NotIsolated (RemoteData Unit (H.Component NotIsolated.Query {} Void m))
 
 type State m = Route m
 
@@ -71,10 +76,21 @@ component = H.mkComponent
       void $ H.put $ WithTypeClass $ Success $ lazyComponent unit
       pure unit
 
+    LoadNotIsolated -> do
+      lazyComponent <- liftAff $ toAffE (dynamicImport NotIsolated.component)
+      void $ H.put $ NotIsolated $ Success $ lazyComponent unit
+      H.tell (Proxy :: _ "not-isolated") unit NotIsolated.Query
+      pure unit
+
+    SendQuery -> do
+      H.tell (Proxy :: _ "not-isolated") unit Query
+
   render route = HH.div []
     [ HH.div []
         [ HH.button [ HE.onClick \_ -> LoadAdmin ] [ HH.text "Load Admin" ]
         , HH.button [ HE.onClick \_ -> LoadWithTypeClass ] [ HH.text "Load WithTypeClass" ]
+        , HH.button [ HE.onClick \_ -> LoadNotIsolated ] [ HH.text "Load Not isolated" ]
+        , HH.button [ HE.onClick \_ -> SendQuery ] [ HH.text "Send query" ]
         ]
     , case route of
         About (Success c) ->
@@ -85,5 +101,9 @@ component = H.mkComponent
 
         WithTypeClass (Success c) ->
           HH.slot_ (Proxy :: _ "with-typeclass") unit c {}
+
+        NotIsolated (Success c) ->
+          HH.slot_ (Proxy :: _ "not-isolated") unit c {}
+
         _ -> HH.text "Loading"
     ]
