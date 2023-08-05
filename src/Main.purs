@@ -19,6 +19,8 @@ import Page.About as About
 import Page.Admin as Admin
 import Page.NotIsolated as NotIsolated
 import Page.NotIsolated (Query(..))
+import Page.ProperlyIsolated as ProperlyIsolated
+import Page.ProperlyIsolated.Query as ProperlyIsolated.Query
 import Page.WithTypeClass as WithTypeClass
 import Type.Prelude (Proxy(..))
 
@@ -35,13 +37,16 @@ data Action
   | LoadAdmin
   | LoadWithTypeClass
   | LoadNotIsolated
+  | LoadProperlyIsolated
   | SendQuery
+  | SendQueryToProperlyIsolated
 
 data Route m
   = About (RemoteData Unit (H.Component NoQuery {} Void m))
   | Admin (RemoteData Unit (H.Component NoQuery {} Void m))
   | WithTypeClass (RemoteData Unit (H.Component NoQuery {} Void m))
   | NotIsolated (RemoteData Unit (H.Component NotIsolated.Query {} Void m))
+  | ProperlyIsolated (RemoteData Unit (H.Component ProperlyIsolated.Query.Query {} Void m))
 
 type State m = Route m
 
@@ -77,20 +82,30 @@ component = H.mkComponent
       pure unit
 
     LoadNotIsolated -> do
-      lazyComponent <- liftAff $ toAffE (dynamicImport NotIsolated.component)
-      void $ H.put $ NotIsolated $ Success $ lazyComponent unit
-      H.tell (Proxy :: _ "not-isolated") unit NotIsolated.Query
+      -- lazyComponent <- liftAff $ toAffE (dynamicImport NotIsolated.component)
+      -- void $ H.put $ NotIsolated $ Success $ lazyComponent unit
+      void $ H.put $ NotIsolated $ Success $ (NotIsolated.component unit)
+      pure unit
+
+    LoadProperlyIsolated -> do
+      lazyComponent <- liftAff $ toAffE (dynamicImport ProperlyIsolated.component)
+      void $ H.put $ ProperlyIsolated $ Success $ lazyComponent unit
       pure unit
 
     SendQuery -> do
       H.tell (Proxy :: _ "not-isolated") unit Query
+
+    SendQueryToProperlyIsolated -> do
+      H.tell (Proxy :: _ "properly-isolated") unit ProperlyIsolated.Query.Query
 
   render route = HH.div []
     [ HH.div []
         [ HH.button [ HE.onClick \_ -> LoadAdmin ] [ HH.text "Load Admin" ]
         , HH.button [ HE.onClick \_ -> LoadWithTypeClass ] [ HH.text "Load WithTypeClass" ]
         , HH.button [ HE.onClick \_ -> LoadNotIsolated ] [ HH.text "Load Not isolated" ]
+        , HH.button [ HE.onClick \_ -> LoadProperlyIsolated ] [ HH.text "Load properly isolated" ]
         , HH.button [ HE.onClick \_ -> SendQuery ] [ HH.text "Send query" ]
+        , HH.button [ HE.onClick \_ -> SendQueryToProperlyIsolated ] [ HH.text "Send query to properly isolated" ]
         ]
     , case route of
         About (Success c) ->
@@ -104,6 +119,9 @@ component = H.mkComponent
 
         NotIsolated (Success c) ->
           HH.slot_ (Proxy :: _ "not-isolated") unit c {}
+
+        ProperlyIsolated (Success c) ->
+          HH.slot_ (Proxy :: _ "properly-isolated") unit c {}
 
         _ -> HH.text "Loading"
     ]
