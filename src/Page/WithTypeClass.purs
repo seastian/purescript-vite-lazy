@@ -1,10 +1,11 @@
-module MyComponent where
+module Page.WithTypeClass where
 
 import Prelude
 
-import AClass (class GetAString, getAString)
+import GetAString (class GetAString, getAString)
 import Data.Maybe (Maybe(..))
-import Effect.Aff.Class (class MonadAff, liftAff)
+import Data.NoQuery (NoQuery)
+import Effect.Aff.Class (class MonadAff)
 import Effect.Class.Console (log)
 import Halogen as H
 import Halogen.HTML as HH
@@ -15,14 +16,12 @@ type State = { aString :: String }
 
 data Action = Initialize
 
-data Query a = NoQuery a
-
 component
   :: Unit
   -> forall m
    . GetAString m
   => MonadAff m
-  => H.Component Query Input Void m
+  => H.Component NoQuery Input Void m
 component _ = H.mkComponent
   { initialState
   , render

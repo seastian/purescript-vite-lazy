@@ -1,4 +1,4 @@
-module AClass where
+module GetAString where
 
 import Prelude
 
