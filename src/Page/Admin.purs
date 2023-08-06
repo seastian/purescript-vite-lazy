@@ -1,4 +1,4 @@
-module Page.Admin (component, Input) where
+module Page.Admin (admin, Input) where
 
 import Prelude
 
@@ -8,8 +8,8 @@ import Halogen.HTML as HH
 
 type Input = {}
 
-component :: Unit -> forall m. H.Component NoQuery Input Void m
-component _ = H.mkComponent
+admin :: Unit -> forall m. H.Component NoQuery Input Void m
+admin _ = H.mkComponent
   { initialState
   , render
   , eval: H.mkEval H.defaultEval

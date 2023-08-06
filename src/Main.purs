@@ -72,7 +72,7 @@ component = H.mkComponent
     LoadAbout -> handleAction Initialize
 
     LoadAdmin -> do
-      lazyComponent <- liftAff $ toAffE (dynamicImport Admin.component)
+      lazyComponent <- liftAff $ toAffE (dynamicImport Admin.admin)
       void $ H.put $ Admin $ Success $ lazyComponent unit
       pure unit
 
