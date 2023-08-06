@@ -11,7 +11,6 @@
   , "remotedata"
   , "transformers"
   , "typelevel-prelude"
-  , "unsafe-coerce"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs" ]
