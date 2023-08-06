@@ -15,7 +15,7 @@ export default defineConfig({
           (match, g, moduleName, componentName) => {
             moduleImportsToRemove.push(moduleName);
             const modulePath = `../${moduleName.replace( "_", ".")}/index.js`
-            return `(() => import("${modulePath}").then(r => r["${componentName}"]))`;
+            return `(() => import("${modulePath}").then(r => r.${componentName}))`;
           }
         );
         const withStaticImportsRemoved = moduleImportsToRemove.reduce(
